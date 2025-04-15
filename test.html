@@ -1,89 +1,139 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EduRock - Generate Test</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EduRock Test</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    }
-  </style>
 </head>
-<body class="bg-gray-900 text-white min-h-screen p-4">
-  <div class="max-w-3xl mx-auto">
-    <h1 class="text-3xl text-green-400 font-bold text-center mb-6">Generate Your Test</h1>
+<body class="bg-gray-900 text-white min-h-screen font-sans">
+  <div class="container mx-auto p-6 max-w-3xl">
+    <h1 class="text-4xl font-bold text-green-400 text-center mb-8">EduRock - Test</h1>
 
-    <div class="mb-6">
-      <label for="numQuestions" class="block mb-2 text-lg">Select number of questions:</label>
-      <select id="numQuestions" class="w-full p-2 rounded text-black">
-        <option value="5">5</option>
-        <option value="10">10</option>
-        <option value="15">15</option>
-        <option value="20">20</option>
+    <!-- Test Options -->
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md text-center">
+      <h2 class="text-xl font-semibold text-green-400 mb-4">Choose Number of Questions</h2>
+      <select id="questionCount" class="bg-gray-700 text-white py-2 px-4 rounded">
+        <option value="20">20 Questions</option>
+        <option value="25">25 Questions</option>
+        <option value="30">30 Questions</option>
+        <option value="35">35 Questions</option>
+        <option value="40">40 Questions</option>
       </select>
-      <button onclick="generateTest()" class="mt-4 w-full bg-green-500 hover:bg-green-600 text-white p-2 rounded">Generate Test</button>
+      <button onclick="generateTest()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-4">
+        Generate Test
+      </button>
     </div>
 
-    <div id="testArea" class="space-y-6"></div>
-    <div class="text-center mt-8">
-      <button onclick="submitTest()" class="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-full text-lg">Submit Answers</button>
+    <!-- Questions Section -->
+    <div id="questionsContainer" class="mt-8 space-y-6 hidden">
+      <h2 class="text-2xl font-bold text-green-300">Test</h2>
+      <form id="testForm"></form>
+      <button onclick="submitTest()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-4">
+        Submit Test
+      </button>
     </div>
 
-    <div id="resultArea" class="mt-10 text-center text-xl font-semibold text-green-400"></div>
+    <!-- Test Results Section -->
+    <div id="resultsContainer" class="mt-8 hidden">
+      <h2 class="text-2xl font-bold text-green-300">Test Results</h2>
+      <div id="results"></div>
+      <button onclick="resetTest()" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-4">
+        Retake Test
+      </button>
+    </div>
   </div>
 
   <script>
-    const dummySummaries = [
-      "Photosynthesis is the process by which plants use sunlight, water, and CO2 to create energy in the form of glucose.",
-      "Newton's laws describe motion: 1) inertia, 2) F=ma, 3) equal and opposite reactions.",
-      "The water cycle includes evaporation, condensation, precipitation, and collection.",
-      "DNA is a double helix structure containing genes that code for proteins."
+    const testQuestions = [
+      // Sample questions for demonstration. Replace this with actual logic to fetch questions.
+      {
+        question: "What is the capital of France?",
+        options: ["Berlin", "Madrid", "Paris", "Rome"],
+        correctAnswer: 2,
+        explanation: "Paris is the capital of France."
+      },
+      {
+        question: "What is 2 + 2?",
+        options: ["3", "4", "5", "6"],
+        correctAnswer: 1,
+        explanation: "2 + 2 equals 4."
+      },
+      {
+        question: "What is the boiling point of water?",
+        options: ["90°C", "100°C", "110°C", "120°C"],
+        correctAnswer: 1,
+        explanation: "Water boils at 100°C at standard pressure."
+      },
+      // Add more questions as necessary
     ];
 
-    let questions = [];
+    let selectedQuestions = [];
 
+    // Generate test questions based on selected number
     function generateTest() {
-      const num = parseInt(document.getElementById('numQuestions').value);
-      questions = [];
-      document.getElementById('testArea').innerHTML = '';
-      for (let i = 0; i < num; i++) {
-        const summary = dummySummaries[i % dummySummaries.length];
-        const question = `What is the main idea of this summary: "${summary}"?`;
-        const correct = summary.split(' ')[0];
-        const options = shuffleArray([
-          correct,
-          "Random",
-          "Incorrect",
-          "Misleading"
-        ]);
-        questions.push({ question, options, correct });
+      const questionCount = parseInt(document.getElementById('questionCount').value);
+      selectedQuestions = testQuestions.slice(0, questionCount); // Select first 'n' questions
 
-        document.getElementById('testArea').innerHTML += `
-          <div>
-            <p class="mb-2 font-bold">${i + 1}. ${question}</p>
-            ${options.map(opt => `
-              <label class="block">
-                <input type="radio" name="q${i}" value="${opt}" class="mr-2">
-                ${opt}
-              </label>`).join('')}
+      const form = document.getElementById('testForm');
+      form.innerHTML = ''; // Clear previous questions
+
+      selectedQuestions.forEach((q, index) => {
+        const questionHTML = `
+          <div class="bg-gray-800 p-4 rounded shadow">
+            <h3 class="text-lg font-bold text-green-300">${index + 1}. ${q.question}</h3>
+            <div class="space-y-2">
+              ${q.options.map((option, i) => `
+                <label class="inline-flex items-center">
+                  <input type="radio" name="question${index}" value="${i}" class="text-green-400" />
+                  <span class="ml-2 text-gray-300">${option}</span>
+                </label>
+              `).join('')}
+            </div>
           </div>
         `;
-      }
+        form.innerHTML += questionHTML;
+      });
+
+      document.getElementById('questionsContainer').classList.remove('hidden');
     }
 
+    // Submit test and show results
     function submitTest() {
       let score = 0;
-      questions.forEach((q, i) => {
-        const selected = document.querySelector(`input[name=q${i}]:checked`);
-        if (selected && selected.value === q.correct) score++;
+      const form = document.getElementById('testForm');
+
+      selectedQuestions.forEach((q, index) => {
+        const userAnswer = form.querySelector(`input[name="question${index}"]:checked`);
+        if (userAnswer && parseInt(userAnswer.value) === q.correctAnswer) {
+          score++;
+        }
       });
-      document.getElementById('resultArea').textContent = `You scored ${score} out of ${questions.length}`;
+
+      const resultsDiv = document.getElementById('results');
+      resultsDiv.innerHTML = `<p class="text-gray-300">Your score: ${score}/${selectedQuestions.length}</p>`;
+      resultsDiv.innerHTML += `<p class="text-gray-300">Answers and explanations:</p>`;
+      
+      selectedQuestions.forEach((q, index) => {
+        const isCorrect = form.querySelector(`input[name="question${index}"]:checked`)?.value == q.correctAnswer;
+        resultsDiv.innerHTML += `
+          <div class="bg-gray-800 p-4 rounded shadow mt-4">
+            <h4 class="text-green-300">${index + 1}. ${q.question}</h4>
+            <p class="text-gray-300">Your Answer: ${q.options[form.querySelector(`input[name="question${index}"]:checked`)?.value]}</p>
+            <p class="text-gray-400">${q.explanation}</p>
+            <p class="text-gray-400">Correct Answer: ${q.options[q.correctAnswer]}</p>
+          </div>
+        `;
+      });
+
+      document.getElementById('resultsContainer').classList.remove('hidden');
+      document.getElementById('questionsContainer').classList.add('hidden');
     }
 
-    function shuffleArray(arr) {
-      return arr.sort(() => Math.random() - 0.5);
+    // Reset the test to retake it
+    function resetTest() {
+      document.getElementById('resultsContainer').classList.add('hidden');
+      document.getElementById('questionsContainer').classList.add('hidden');
     }
   </script>
 </body>
